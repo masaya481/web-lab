@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { Client } = require("pg");
+require("dotenv").config();
 
 // ログファイルのパス
 const logPath = path.join("/usr/src/app/logs", "app.log");
@@ -25,22 +26,22 @@ console.error = (...args) => {
   origError(msg);
 };
 
-const app = express();
-app.use(express.json());
-
 // DB接続
 const client = new Client({
-  host: "db",
-  user: "user",
-  password: "password",
-  database: "myapp",
-  port: 5432,
+  host: process.env.POSTGRES_HOST,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+  port: process.env.POSTGRES_PORT,
 });
 
 client
   .connect()
   .then(() => console.log("Connected to Postgres"))
   .catch((err) => console.error("Connection error", err.stack));
+
+const app = express();
+app.use(express.json());
 
 // ルート：時刻を返す
 app.get("/", async (req, res) => {
@@ -111,35 +112,5 @@ app.delete("/notes/:id", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
-
-// const express = require("express");
-// const { Client } = require("pg");
-
-// const app = express();
-
-// // DB接続設定（docker-compose.yml の設定に合わせる）
-// const client = new Client({
-//   host: "db",
-//   user: "user",
-//   password: "password",
-//   database: "myapp",
-//   port: 5432,
-// });
-
-// client
-//   .connect()
-//   .then(() => console.log("Connected to Postgres"))
-//   .catch((err) => console.error("Connection error", err.stack));
-
-// app.get("/", async (req, res) => {
-//   try {
-//     const result = await client.query("SELECT NOW()");
-//     res.send(`Hello from Postgres! Server time is: ${result.rows[0].now}`);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("DB query failed");
-//   }
-// });
-
-// app.listen(3000, () => console.log("Server running on port 3000"));
+const port = process.env.APP_PORT || 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));

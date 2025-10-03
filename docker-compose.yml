@@ -3,6 +3,8 @@ services:
   app:
     build: ./app
     working_dir: /usr/src/app
+    env_file:
+      - ./app/.env
     volumes:
       - ./logs:/usr/src/app/logs
     command: npm start

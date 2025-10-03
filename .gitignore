@@ -1,3 +1,4 @@
+app/.env
 logs/
 node_modules
 db_data/
